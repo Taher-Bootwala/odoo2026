@@ -17,66 +17,65 @@ export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  // 1. Try standard sign in
+  // 1. Try standard sign in first
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
-  // 2. If it fails, check if it's one of our static users and auto-register them
-  if (error) {
+  if (!error && data?.user) {
+    // Login succeeded — ensure static users have correct roles
     const staticUser = STATIC_USERS.find(
       (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
     )
-
     if (staticUser) {
-      // Programmatically sign up the static user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: staticUser.full_name,
-            email: email,
-          }
-        }
-      })
-
-      if (!signUpError && signUpData.user) {
-        // Sign in with the newly created account
-        const signInRes = await supabase.auth.signInWithPassword({ email, password })
-        if (!signInRes.error) {
-          // Update the role in public.users (since they are now authenticated, they can update their own row)
-          await supabase
-            .from('users')
-            .update({
-              role: staticUser.role as any,
-              full_name: staticUser.full_name
-            })
-            .eq('id', signUpData.user.id)
-
-          revalidatePath('/', 'layout')
-          redirect('/dashboard')
-        }
-      }
+      await supabase
+        .from('users')
+        .update({
+          role: staticUser.role as any,
+          full_name: staticUser.full_name,
+        })
+        .eq('id', data.user.id)
     }
 
-    redirect(`/login?error=${encodeURIComponent('Invalid login credentials')}`)
+    revalidatePath('/', 'layout')
+    redirect('/dashboard')
   }
 
-  // 3. Even if standard login succeeds, ensure static users have their correct roles assigned
+  // 2. Sign in failed — check if it's a known static user and auto-register them
   const staticUser = STATIC_USERS.find(
     (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
   )
-  if (staticUser && data?.user) {
-    await supabase
-      .from('users')
-      .update({
-        role: staticUser.role as any,
-        full_name: staticUser.full_name
-      })
-      .eq('id', data.user.id)
+
+  if (staticUser) {
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: staticUser.full_name,
+          email: email,
+        },
+      },
+    })
+
+    if (!signUpError && signUpData.user) {
+      const signInRes = await supabase.auth.signInWithPassword({ email, password })
+
+      if (!signInRes.error && signInRes.data?.user) {
+        await supabase
+          .from('users')
+          .update({
+            role: staticUser.role as any,
+            full_name: staticUser.full_name,
+          })
+          .eq('id', signUpData.user.id)
+
+        revalidatePath('/', 'layout')
+        redirect('/dashboard')
+      }
+    }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  // 3. All attempts failed
+  redirect(`/login?error=${encodeURIComponent('Invalid login credentials')}`)
 }
 
 export async function signup(formData: FormData) {
@@ -97,7 +96,6 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    // Supabase often returns '{}' for database trigger errors
     let message = error.message
     if (!message || message === '{}' || message === '{""}') {
       message = 'Sign up failed. A database error occurred — please check your Supabase database triggers.'
@@ -105,7 +103,6 @@ export async function signup(formData: FormData) {
     redirect(`/register?error=${encodeURIComponent(message)}`)
   }
 
-  // If email confirmation is enabled, user won't have a session yet
   if (data?.user?.identities?.length === 0) {
     redirect(`/register?error=${encodeURIComponent('An account with this email already exists. Please sign in instead.')}`)
   }
