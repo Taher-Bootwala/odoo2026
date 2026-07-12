@@ -11,16 +11,18 @@ export default async function ActivitiesPage() {
 
   return (
     <>
-      <div className="page-title-row">
-        <h1 className="page-title">Activity Logs</h1>
+      <div className="content-header" id="content-header">
+        <div className="page-title-row">
+          <h1 className="page-title">Activity Logs</h1>
+        </div>
       </div>
       
-      <div style={{
+      <div style={{ padding: '24px 28px' }}>
+        <div style={{
         background: 'var(--color-surface)',
         borderRadius: 'var(--border-radius-lg)',
         border: '1px solid var(--color-border-light)',
         padding: '20px',
-        marginTop: '20px',
         boxShadow: 'var(--shadow-card)'
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--color-text)', fontSize: '14px' }}>
@@ -69,6 +71,7 @@ export default async function ActivitiesPage() {
             )}
           </tbody>
         </table>
+      </div>
       </div>
     </>
   )

@@ -58,16 +58,19 @@ export default function TransfersClient({ initialTransfers, assets, departments 
         </form>
       </Modal>
 
-      <div className="page-title-row">
-        <h1 className="page-title">Asset Transfers</h1>
-        <div className="header-actions">
-          <button className="action-btn action-btn-primary" onClick={() => setIsModalOpen(true)}>
-            Initiate Transfer
-          </button>
+      <div className="content-header" id="content-header">
+        <div className="page-title-row">
+          <h1 className="page-title">Asset Transfers</h1>
+          <div className="header-actions">
+            <button className="action-btn action-btn-primary" onClick={() => setIsModalOpen(true)}>
+              Initiate Transfer
+            </button>
+          </div>
         </div>
       </div>
       
-      <div style={{
+      <div style={{ padding: '24px 28px' }}>
+        <div style={{
         background: 'var(--color-surface)',
         borderRadius: 'var(--border-radius-lg)',
         border: '1px solid var(--color-border-light)',
@@ -125,6 +128,7 @@ export default function TransfersClient({ initialTransfers, assets, departments 
             )}
           </tbody>
         </table>
+      </div>
       </div>
     </>
   )
