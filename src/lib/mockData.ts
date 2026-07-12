@@ -1,0 +1,33 @@
+export const ASSET_DATA = [
+  { name: "Access Point", total: 24, inUse: 1, inStore: 21, inRepair: 0, others: 2, icon: "accessPoint" },
+  { name: "Chromebook", total: 8, inUse: 0, inStore: 7, inRepair: 1, others: 0, icon: "chromebook" },
+  { name: "Cisco Catos Switch", total: 24, inUse: 7, inStore: 15, inRepair: 2, others: 0, icon: "ciscoSwitch" },
+  { name: "Cisco Router", total: 17, inUse: 9, inStore: 8, inRepair: 0, others: 0, icon: "router" },
+  { name: "Cisco Switch", total: 0, inUse: 0, inStore: 0, inRepair: 0, others: 0, icon: "ciscoSwitch" },
+  { name: "Computer", total: 32, inUse: 0, inStore: 27, inRepair: 5, others: 0, icon: "computer" },
+  { name: "Cooling Pads", total: 0, inUse: 0, inStore: 0, inRepair: 0, others: 0, icon: "coolingPads" },
+  { name: "Encrypted Phones", total: 14, inUse: 1, inStore: 0, inRepair: 0, others: 0, icon: "encryptedPhone" },
+  { name: "Firewall", total: 5, inUse: 0, inStore: 5, inRepair: 0, others: 0, icon: "firewall" },
+  { name: "iPad", total: 0, inUse: 0, inStore: 0, inRepair: 0, others: 0, icon: "ipad" },
+  { name: "Mobile", total: 0, inUse: 0, inStore: 0, inRepair: 0, others: 0, icon: "mobile" },
+  { name: "Network Services", total: 1, inUse: 0, inStore: 1, inRepair: 0, others: 0, icon: "networkServices" },
+  { name: "Printer", total: 9, inUse: 0, inStore: 9, inRepair: 0, others: 0, icon: "printer" },
+  { name: "Rack", total: 1, inUse: 0, inStore: 1, inRepair: 0, others: 0, icon: "rack" },
+  { name: "Router", total: 15, inUse: 1, inStore: 14, inRepair: 0, others: 0, icon: "router" },
+  { name: "Server", total: 29, inUse: 0, inStore: 29, inRepair: 0, others: 0, icon: "server" },
+  { name: "Self Service", total: 3, inUse: 1, inStore: 2, inRepair: 0, others: 0, icon: "selfService" },
+  { name: "Monitor", total: 12, inUse: 4, inStore: 6, inRepair: 1, others: 0, icon: "monitor" },
+  { name: "UPS", total: 7, inUse: 2, inStore: 5, inRepair: 0, others: 0, icon: "ups" },
+  { name: "Webcam", total: 5, inUse: 1, inStore: 4, inRepair: 0, others: 0, icon: "webcam" },
+];
+
+export const ACTIVITY_DATA = [
+  { type: 'added', text: '<strong>5 Servers</strong> added to Data Center inventory', time: '12 minutes ago' },
+  { type: 'moved', text: '<strong>Cisco Router #17</strong> moved to In Use', time: '34 minutes ago' },
+  { type: 'repaired', text: '<strong>Computer #28</strong> repair completed', time: '1 hour ago' },
+  { type: 'updated', text: '<strong>Firewall</strong> firmware updated across 3 units', time: '2 hours ago' },
+  { type: 'added', text: '<strong>2 Monitors</strong> received at Headquarters', time: '3 hours ago' },
+  { type: 'removed', text: '<strong>Chromebook #3</strong> decommissioned', time: '5 hours ago' },
+  { type: 'moved', text: '<strong>Access Point #12</strong> relocated to Branch Office', time: '6 hours ago' },
+  { type: 'repaired', text: '<strong>Printer #7</strong> sent for maintenance', time: 'Yesterday' },
+];
