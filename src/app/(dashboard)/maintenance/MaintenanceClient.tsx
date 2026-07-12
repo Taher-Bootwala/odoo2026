@@ -28,8 +28,8 @@ export default function MaintenanceClient({ initialRequests, assets }: { initial
         <form action={handleSubmit}>
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="asset_id" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="" disabled selected>Select an asset...</option>
+            <select name="asset_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+              <option value="" disabled>Select an asset...</option>
               {assets.map((asset: any) => (
                 <option key={asset.id} value={asset.id}>{asset.name}</option>
               ))}
@@ -39,9 +39,9 @@ export default function MaintenanceClient({ initialRequests, assets }: { initial
 
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Priority</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="priority" required style={{...formInputStyle, marginBottom: 0}}>
+            <select name="priority" required defaultValue="medium" style={{...formInputStyle, marginBottom: 0}}>
               <option value="low">Low</option>
-              <option value="medium" selected>Medium</option>
+              <option value="medium">Medium</option>
               <option value="high">High</option>
               <option value="critical">Critical</option>
             </select>

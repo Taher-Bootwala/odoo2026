@@ -28,8 +28,8 @@ export default function TransfersClient({ initialTransfers, assets, departments 
         <form action={handleSubmit}>
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset to Transfer</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="asset_id" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="" disabled selected>Select an asset...</option>
+            <select name="asset_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+              <option value="" disabled>Select an asset...</option>
               {assets.map((asset: any) => (
                 <option key={asset.id} value={asset.id}>{asset.name}</option>
               ))}
@@ -39,8 +39,8 @@ export default function TransfersClient({ initialTransfers, assets, departments 
 
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Target Department</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="to_department_id" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="" disabled selected>Select destination...</option>
+            <select name="to_department_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+              <option value="" disabled>Select destination...</option>
               {departments.map((dept: any) => (
                 <option key={dept.id} value={dept.id}>{dept.name}</option>
               ))}

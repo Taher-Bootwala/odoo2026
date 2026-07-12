@@ -28,8 +28,8 @@ export default function BookingsClient({ initialBookings, resources }: { initial
         <form action={handleSubmit}>
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Resource</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="resource_id" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="" disabled selected>Select a resource...</option>
+            <select name="resource_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+              <option value="" disabled>Select a resource...</option>
               {resources.map((res: any) => (
                 <option key={res.id} value={res.id}>{res.name}</option>
               ))}

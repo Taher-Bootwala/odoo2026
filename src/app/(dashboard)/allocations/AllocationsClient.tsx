@@ -38,8 +38,8 @@ export default function AllocationsClient({ initialAllocations, assets, employee
         <form action={handleAllocateSubmit}>
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="asset_id" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="" disabled selected>Select an available asset...</option>
+            <select name="asset_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+              <option value="" disabled>Select an available asset...</option>
               {assets.map((asset: any) => (
                 <option key={asset.id} value={asset.id}>{asset.name}</option>
               ))}
@@ -49,8 +49,8 @@ export default function AllocationsClient({ initialAllocations, assets, employee
 
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Assign To Employee</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="employee_id" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="" disabled selected>Select employee...</option>
+            <select name="employee_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+              <option value="" disabled>Select employee...</option>
               {employees.map((emp: any) => (
                 <option key={emp.id} value={emp.id}>{emp.full_name}</option>
               ))}
@@ -77,9 +77,9 @@ export default function AllocationsClient({ initialAllocations, assets, employee
           
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Return Condition</label>
           <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="return_condition" required style={{...formInputStyle, marginBottom: 0}}>
+            <select name="return_condition" required defaultValue="good" style={{...formInputStyle, marginBottom: 0}}>
               <option value="excellent">Excellent</option>
-              <option value="good" selected>Good</option>
+              <option value="good">Good</option>
               <option value="fair">Fair</option>
               <option value="poor">Poor</option>
               <option value="damaged">Damaged</option>

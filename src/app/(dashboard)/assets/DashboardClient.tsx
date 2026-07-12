@@ -19,6 +19,7 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
   const [chartType, setChartType] = useState<'donut' | 'bar'>('donut');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isShared, setIsShared] = useState(false);
   const chartCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Group the raw Supabase assets into the category-based structure expected by the UI
@@ -58,7 +59,7 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
     return {
       type,
       text: log.description,
-      time: new Date(log.created_at).toLocaleString()
+      time: new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 19)
     };
   });
 
@@ -245,49 +246,125 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
   return (
     <>
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add New Asset">
-        <form action={handleAddSubmit}>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset Name/Model</label>
+        <form action={handleAddSubmit} style={{ maxHeight: '75vh', overflowY: 'auto', paddingRight: '6px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset Name</label>
           <input name="name" required placeholder="e.g. Dell XPS 15" style={formInputStyle} />
           
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Category</label>
-          <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="category_id" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="" disabled selected>Select a category...</option>
-              {categories.map((cat: any) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-            <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Category</label>
+              <div className="select-wrapper" style={{ marginBottom: '16px' }}>
+                <select name="category_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+                  <option value="" disabled>Select category...</option>
+                  {categories.map((cat: any) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+                <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Serial Number</label>
+              <input name="serial_number" placeholder="e.g. SN-98239A" style={formInputStyle} />
+            </div>
           </div>
 
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Status</label>
-          <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="status" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="available">Available (In Store)</option>
-              <option value="allocated">Allocated (In Use)</option>
-              <option value="reserved">Reserved</option>
-              <option value="under_maintenance">Under Maintenance</option>
-              <option value="lost">Lost</option>
-              <option value="retired">Retired</option>
-              <option value="disposed">Disposed</option>
-            </select>
-            <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Manufacturer</label>
+              <input name="manufacturer" placeholder="e.g. Dell" style={formInputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Model</label>
+              <input name="model" placeholder="e.g. XPS 15 9520" style={formInputStyle} />
+            </div>
           </div>
 
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Condition</label>
-          <div className="select-wrapper" style={{ marginBottom: '16px' }}>
-            <select name="condition" required style={{...formInputStyle, marginBottom: 0}}>
-              <option value="excellent">Excellent</option>
-              <option value="good" selected>Good</option>
-              <option value="fair">Fair</option>
-              <option value="poor">Poor</option>
-              <option value="damaged">Damaged</option>
-            </select>
-            <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Purchase Date</label>
+              <input type="date" name="purchase_date" style={formInputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Purchase Cost ($)</label>
+              <input type="number" step="0.01" name="purchase_cost" placeholder="0.00" style={formInputStyle} />
+            </div>
           </div>
 
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Location</label>
-          <input name="location" required placeholder="e.g. HQ - Floor 3" style={formInputStyle} />
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Warranty Expiry</label>
+              <input type="date" name="warranty_expiry" style={formInputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Location</label>
+              <input name="location" required placeholder="e.g. HQ - Floor 3" style={formInputStyle} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Status</label>
+              <div className="select-wrapper" style={{ marginBottom: '16px' }}>
+                <select name="status" required defaultValue="available" style={{...formInputStyle, marginBottom: 0}}>
+                  <option value="available">Available</option>
+                  <option value="allocated">Allocated</option>
+                  <option value="reserved">Reserved</option>
+                  <option value="under_maintenance">Under Maintenance</option>
+                  <option value="lost">Lost</option>
+                  <option value="retired">Retired</option>
+                  <option value="disposed">Disposed</option>
+                </select>
+                <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Condition</label>
+              <div className="select-wrapper" style={{ marginBottom: '16px' }}>
+                <select name="condition" required defaultValue="good" style={{...formInputStyle, marginBottom: 0}}>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                  <option value="damaged">Damaged</option>
+                </select>
+                <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <input 
+              type="checkbox" 
+              id="is_shared_resource" 
+              name="is_shared_resource" 
+              value="true" 
+              checked={isShared} 
+              onChange={(e) => setIsShared(e.target.checked)} 
+              style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+            />
+            <label htmlFor="is_shared_resource" style={{ fontSize: '13px', color: 'var(--color-text)', fontWeight: 500, cursor: 'pointer' }}>
+              Is Shared Bookable Resource?
+            </label>
+          </div>
+
+          {isShared && (
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Resource Type</label>
+              <div className="select-wrapper">
+                <select name="resource_type" required defaultValue="meeting_room" style={formInputStyle}>
+                  <option value="meeting_room">Meeting Room</option>
+                  <option value="conference_hall">Conference Hall</option>
+                  <option value="projector">Projector</option>
+                  <option value="company_vehicle">Company Vehicle</option>
+                </select>
+                <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </div>
+          )}
+
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Description</label>
+          <textarea name="description" placeholder="Optional notes on the asset..." rows={3} style={{...formInputStyle, resize: 'vertical'}} />
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
             <button type="button" onClick={() => setIsAddModalOpen(false)} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }} onMouseOver={(e) => { e.currentTarget.style.color = 'var(--color-text)'; e.currentTarget.style.borderColor = 'var(--color-border-light)'; }} onMouseOut={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.borderColor = 'var(--color-border)'; }}>Cancel</button>
@@ -539,7 +616,7 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
                 </div>
                 <div className="activity-body">
                   <div className="activity-text" dangerouslySetInnerHTML={{ __html: item.text }}></div>
-                  <div className="activity-time">{item.time}</div>
+                  <div className="activity-time" suppressHydrationWarning>{item.time}</div>
                 </div>
               </div>
             ))}
@@ -591,6 +668,98 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="asset-grid-header" style={{ marginTop: '40px' }}>
+        <h2 className="section-title">Individual Assets Registry</h2>
+        <span className="section-count">{initialAssets.length} assets total</span>
+      </div>
+
+      <div style={{
+        background: 'var(--color-surface)',
+        borderRadius: 'var(--border-radius-lg)',
+        border: '1px solid var(--color-border-light)',
+        padding: '20px',
+        marginTop: '20px',
+        boxShadow: 'var(--shadow-card)',
+        overflowX: 'auto'
+      }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--color-text)', fontSize: '14px' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--color-border-light)', textAlign: 'left', color: 'var(--color-text-secondary)' }}>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Asset ID</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Name</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Category</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Serial Number</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Location</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Shared?</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Condition</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600' }}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {initialAssets
+              .filter(asset => {
+                if (!searchQuery) return true;
+                const q = searchQuery.toLowerCase().trim();
+                return asset.name.toLowerCase().includes(q) || 
+                       (asset.asset_id && asset.asset_id.toLowerCase().includes(q)) ||
+                       (asset.serial_number && asset.serial_number.toLowerCase().includes(q)) ||
+                       (asset.location && asset.location.toLowerCase().includes(q)) ||
+                       asset.status.toLowerCase().includes(q);
+              })
+              .map((asset) => (
+                <tr key={asset.id} style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                  <td style={{ padding: '16px', fontWeight: '600', color: 'var(--color-primary)' }}>
+                    {asset.asset_id}
+                  </td>
+                  <td style={{ padding: '16px', fontWeight: '500' }}>
+                    {asset.name}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    {asset.categories?.name || 'Uncategorized'}
+                  </td>
+                  <td style={{ padding: '16px', color: 'var(--color-text-muted)' }}>
+                    {asset.serial_number || 'N/A'}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    {asset.location || 'N/A'}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    {asset.is_shared_resource ? (
+                      <span style={{ color: 'var(--status-in-store)', fontWeight: 600 }}>Yes ({asset.resource_type?.replace('_', ' ')})</span>
+                    ) : 'No'}
+                  </td>
+                  <td style={{ padding: '16px', textTransform: 'capitalize' }}>
+                    {asset.condition}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: asset.status === 'available' ? '#E7F3E8' : asset.status === 'allocated' ? '#E3F1F4' : '#FDF4E9',
+                      color: asset.status === 'available' ? 'var(--status-in-store)' : asset.status === 'allocated' ? '#3B82A0' : '#C78B3F',
+                      border: '1px solid var(--color-border-light)',
+                      fontSize: '13px',
+                      textTransform: 'capitalize',
+                      fontWeight: 500
+                    }}>
+                      {asset.status.replace('_', ' ')}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            {initialAssets.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                  No assets found. Add your first asset above!
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </>
   );

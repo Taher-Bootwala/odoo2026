@@ -17,12 +17,22 @@ export async function allocateAsset(formData: FormData) {
     return { error: 'Unauthorized' }
   }
 
+  // Get employee's department
+  const { data: empData } = await supabase
+    .from('users')
+    .select('department_id')
+    .eq('id', employee_id)
+    .single()
+
+  const department_id = empData?.department_id || null
+
   // Insert allocation record
   const { error: allocError } = await supabase
     .from('asset_allocations')
     .insert([{
       asset_id,
       employee_id,
+      department_id,
       allocated_by: user.id,
       expected_return_date: expected_return_date || null,
       purpose,
