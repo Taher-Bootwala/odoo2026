@@ -20,11 +20,23 @@ export default async function AssetsPage() {
     .select('id, name')
     .order('name')
 
+  const { data: employees } = await supabase
+    .from('users')
+    .select('id, full_name')
+    .order('full_name')
+
+  const { data: departments } = await supabase
+    .from('departments')
+    .select('id, name')
+    .order('name')
+
   return (
     <DashboardClient 
       initialAssets={assets || []} 
       initialActivities={activityLogs || []} 
       categories={categories || []}
+      employees={employees || []}
+      departments={departments || []}
     />
   )
 }

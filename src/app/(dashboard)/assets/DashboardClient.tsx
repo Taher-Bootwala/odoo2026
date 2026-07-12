@@ -6,6 +6,10 @@ import { AssetIcons, ActivityIcons } from '@/components/dashboard/Icons';
 
 import Modal from '@/components/ui/Modal';
 import { addAsset } from './actions';
+import { allocateAsset } from '@/app/(dashboard)/allocations/actions';
+import { initiateTransfer } from '@/app/(dashboard)/transfers/actions';
+import { addMaintenanceRequest } from '@/app/(dashboard)/maintenance/actions';
+import { createBooking } from '@/app/(dashboard)/bookings/actions';
 
 const CHART_COLORS = {
   inUse: '#3B82A0',
@@ -14,13 +18,53 @@ const CHART_COLORS = {
   others: '#9B7CB5',
 };
 
-export default function DashboardClient({ initialAssets, initialActivities, categories }: { initialAssets: any[], initialActivities: any[], categories: any[] }) {
+export default function DashboardClient({ initialAssets, initialActivities, categories, employees, departments }: { initialAssets: any[], initialActivities: any[], categories: any[], employees: any[], departments: any[] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [chartType, setChartType] = useState<'donut' | 'bar'>('donut');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isShared, setIsShared] = useState(false);
+  const [selectedAssetForAllocation, setSelectedAssetForAllocation] = useState<any | null>(null);
+  const [selectedAssetForTransfer, setSelectedAssetForTransfer] = useState<any | null>(null);
+  const [selectedAssetForBooking, setSelectedAssetForBooking] = useState<any | null>(null);
+  const [selectedAssetForMaintenance, setSelectedAssetForMaintenance] = useState<any | null>(null);
   const chartCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  const handleAllocateSubmit = async (formData: FormData) => {
+    const res = await allocateAsset(formData);
+    if (res.success) {
+      setSelectedAssetForAllocation(null);
+    } else {
+      alert(res.error);
+    }
+  };
+
+  const handleTransferSubmit = async (formData: FormData) => {
+    const res = await initiateTransfer(formData);
+    if (res.success) {
+      setSelectedAssetForTransfer(null);
+    } else {
+      alert(res.error);
+    }
+  };
+
+  const handleBookingSubmit = async (formData: FormData) => {
+    const res = await createBooking(formData);
+    if (res.success) {
+      setSelectedAssetForBooking(null);
+    } else {
+      alert(res.error);
+    }
+  };
+
+  const handleMaintenanceSubmit = async (formData: FormData) => {
+    const res = await addMaintenanceRequest(formData);
+    if (res.success) {
+      setSelectedAssetForMaintenance(null);
+    } else {
+      alert(res.error);
+    }
+  };
 
   // Group the raw Supabase assets into the category-based structure expected by the UI
   // ... (rest of logic) ...
@@ -695,6 +739,7 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
               <th style={{ padding: '12px 16px', fontWeight: '600' }}>Shared?</th>
               <th style={{ padding: '12px 16px', fontWeight: '600' }}>Condition</th>
               <th style={{ padding: '12px 16px', fontWeight: '600' }}>Status</th>
+              <th style={{ padding: '12px 16px', fontWeight: '600', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -749,11 +794,53 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
                       {asset.status.replace('_', ' ')}
                     </span>
                   </td>
+                  <td style={{ padding: '16px', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                      {asset.status === 'available' && !asset.is_shared_resource && (
+                        <button 
+                          onClick={() => setSelectedAssetForAllocation(asset)}
+                          className="action-btn action-btn-primary"
+                          style={{ padding: '5px 10px', fontSize: '12px', height: 'auto', minHeight: 'unset' }}
+                        >
+                          Allocate
+                        </button>
+                      )}
+                      {asset.status === 'available' && asset.is_shared_resource && (
+                        <button 
+                          onClick={() => setSelectedAssetForBooking(asset)}
+                          className="action-btn action-btn-primary"
+                          style={{ padding: '5px 10px', fontSize: '12px', height: 'auto', minHeight: 'unset', background: '#5B9A5E', borderColor: '#5B9A5E' }}
+                        >
+                          Book
+                        </button>
+                      )}
+                      {asset.status === 'allocated' && (
+                        <button 
+                          onClick={() => setSelectedAssetForTransfer(asset)}
+                          className="action-btn"
+                          style={{ padding: '5px 10px', fontSize: '12px', height: 'auto', minHeight: 'unset' }}
+                        >
+                          Transfer
+                        </button>
+                      )}
+                      {asset.status !== 'retired' && asset.status !== 'disposed' && (
+                        <button 
+                          onClick={() => setSelectedAssetForMaintenance(asset)}
+                          className="action-btn"
+                          style={{ padding: '5px 10px', fontSize: '12px', height: 'auto', minHeight: 'unset', border: '1px solid #C78B3F', color: '#C78B3F', background: 'transparent' }}
+                          onMouseOver={(e) => { e.currentTarget.style.background = '#C78B3F'; e.currentTarget.style.color = '#fff' }}
+                          onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#C78B3F' }}
+                        >
+                          Repair
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             {initialAssets.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                <td colSpan={9} style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
                   No assets found. Add your first asset above!
                 </td>
               </tr>
@@ -761,6 +848,130 @@ export default function DashboardClient({ initialAssets, initialActivities, cate
           </tbody>
         </table>
       </div>
+
+      {/* Quick Action Modals */}
+      <Modal isOpen={!!selectedAssetForAllocation} onClose={() => setSelectedAssetForAllocation(null)} title="Allocate Asset">
+        {selectedAssetForAllocation && (
+          <form action={handleAllocateSubmit}>
+            <input type="hidden" name="asset_id" value={selectedAssetForAllocation.id} />
+            
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset Name</label>
+            <input disabled value={selectedAssetForAllocation.name} style={{...formInputStyle, background: 'var(--ivory-200)', cursor: 'not-allowed'}} />
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Assign To Employee</label>
+            <div className="select-wrapper" style={{ marginBottom: '16px' }}>
+              <select name="employee_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+                <option value="" disabled>Select employee...</option>
+                {employees.map((emp: any) => (
+                  <option key={emp.id} value={emp.id}>{emp.full_name}</option>
+                ))}
+              </select>
+              <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Expected Return Date</label>
+            <input type="date" name="expected_return_date" style={formInputStyle} />
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Purpose</label>
+            <input name="purpose" required placeholder="e.g. Remote work hardware" style={formInputStyle} />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+              <button type="button" onClick={() => setSelectedAssetForAllocation(null)} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Cancel</button>
+              <button type="submit" style={{ padding: '10px 16px', background: 'var(--color-primary)', border: 'none', color: '#fff', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Allocate</button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      <Modal isOpen={!!selectedAssetForBooking} onClose={() => setSelectedAssetForBooking(null)} title="Book Resource">
+        {selectedAssetForBooking && (
+          <form action={handleBookingSubmit}>
+            <input type="hidden" name="resource_id" value={selectedAssetForBooking.id} />
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Resource Name</label>
+            <input disabled value={selectedAssetForBooking.name} style={{...formInputStyle, background: 'var(--ivory-200)', cursor: 'not-allowed'}} />
+
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Start Time</label>
+                <input type="datetime-local" name="start_time" required style={formInputStyle} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>End Time</label>
+                <input type="datetime-local" name="end_time" required style={formInputStyle} />
+              </div>
+            </div>
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Purpose</label>
+            <input name="purpose" required placeholder="e.g. Client Meeting" style={formInputStyle} />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+              <button type="button" onClick={() => setSelectedAssetForBooking(null)} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Cancel</button>
+              <button type="submit" style={{ padding: '10px 16px', background: 'var(--color-primary)', border: 'none', color: '#fff', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Book</button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      <Modal isOpen={!!selectedAssetForTransfer} onClose={() => setSelectedAssetForTransfer(null)} title="Initiate Asset Transfer">
+        {selectedAssetForTransfer && (
+          <form action={handleTransferSubmit}>
+            <input type="hidden" name="asset_id" value={selectedAssetForTransfer.id} />
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset Name</label>
+            <input disabled value={selectedAssetForTransfer.name} style={{...formInputStyle, background: 'var(--ivory-200)', cursor: 'not-allowed'}} />
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Target Department</label>
+            <div className="select-wrapper" style={{ marginBottom: '16px' }}>
+              <select name="to_department_id" required defaultValue="" style={{...formInputStyle, marginBottom: 0}}>
+                <option value="" disabled>Select destination...</option>
+                {departments.map((dept: any) => (
+                  <option key={dept.id} value={dept.id}>{dept.name}</option>
+                ))}
+              </select>
+              <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Reason for Transfer</label>
+            <textarea name="reason" required rows={3} placeholder="Provide justification..." style={{...formInputStyle, resize: 'vertical'}} />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+              <button type="button" onClick={() => setSelectedAssetForTransfer(null)} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Cancel</button>
+              <button type="submit" style={{ padding: '10px 16px', background: 'var(--color-primary)', border: 'none', color: '#fff', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Initiate Transfer</button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      <Modal isOpen={!!selectedAssetForMaintenance} onClose={() => setSelectedAssetForMaintenance(null)} title="New Maintenance Request">
+        {selectedAssetForMaintenance && (
+          <form action={handleMaintenanceSubmit}>
+            <input type="hidden" name="asset_id" value={selectedAssetForMaintenance.id} />
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Asset Name</label>
+            <input disabled value={selectedAssetForMaintenance.name} style={{...formInputStyle, background: 'var(--ivory-200)', cursor: 'not-allowed'}} />
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Priority</label>
+            <div className="select-wrapper" style={{ marginBottom: '16px' }}>
+              <select name="priority" required defaultValue="medium" style={{...formInputStyle, marginBottom: 0}}>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+              <svg className="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Issue Description</label>
+            <textarea name="issue_description" required rows={4} placeholder="Describe the issue..." style={{...formInputStyle, resize: 'vertical'}} />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+              <button type="button" onClick={() => setSelectedAssetForMaintenance(null)} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Cancel</button>
+              <button type="submit" style={{ padding: '10px 16px', background: 'var(--color-primary)', border: 'none', color: '#fff', borderRadius: 'var(--border-radius-sm)', cursor: 'pointer', transition: 'all 0.2s ease' }}>Submit Request</button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </>
   );
 }
