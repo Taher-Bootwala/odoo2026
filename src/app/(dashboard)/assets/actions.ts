@@ -33,9 +33,9 @@ export async function addAsset(formData: FormData) {
     .insert([{
       name,
       category_id,
-      status,
+      status: status as any,
       location,
-      condition,
+      condition: condition as any,
       serial_number,
       manufacturer,
       model,
@@ -43,7 +43,7 @@ export async function addAsset(formData: FormData) {
       warranty_expiry,
       purchase_cost,
       is_shared_resource,
-      resource_type,
+      resource_type: resource_type as any,
       description
     }])
     .select()

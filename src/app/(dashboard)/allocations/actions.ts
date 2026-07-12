@@ -89,7 +89,7 @@ export async function returnAsset(formData: FormData) {
     .update({
       status: 'returned',
       actual_return_date: new Date().toISOString().split('T')[0],
-      return_condition,
+      return_condition: return_condition as any,
       return_remarks
     })
     .eq('id', allocation_id)
@@ -102,7 +102,7 @@ export async function returnAsset(formData: FormData) {
   await supabase.from('assets').update({
     status: 'available',
     current_holder_id: null,
-    condition: return_condition
+    condition: return_condition as any
   }).eq('id', allocation.asset_id)
 
   // Create an activity log

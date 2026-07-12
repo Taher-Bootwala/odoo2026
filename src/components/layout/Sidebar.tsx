@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({
     'tree-all-assets': true,
     'tree-assets': true,
@@ -37,7 +39,7 @@ export default function Sidebar() {
       <div className="sidebar-section">
         <div className="sidebar-tree">
           <Link href="/assets" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="tree-item active" id="tree-all-assets">
+            <div className={`tree-item ${pathname?.startsWith('/assets') ? 'active' : ''}`} id="tree-all-assets">
               <button className={`tree-toggle ${expandedNodes['tree-all-assets'] ? 'expanded' : ''}`} aria-label="Toggle" onClick={(e) => toggleNode('tree-all-assets', e)}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 12 15 18 9" />
@@ -55,7 +57,7 @@ export default function Sidebar() {
             <div className="tree-children">
               
               <Link href="/assets" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="tree-item active-item" id="tree-assets">
+                <div className={`tree-item ${pathname === '/assets' ? 'active-item' : ''}`} id="tree-assets">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
                     <line x1="8" y1="21" x2="16" y2="21" />
@@ -66,7 +68,7 @@ export default function Sidebar() {
               </Link>
 
               <Link href="/activities" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="tree-item" id="tree-history">
+                <div className={`tree-item ${pathname === '/activities' ? 'active-item' : ''}`} id="tree-history">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <polyline points="12 6 12 12 16 14" />
@@ -76,7 +78,7 @@ export default function Sidebar() {
               </Link>
 
               <Link href="/maintenance" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="tree-item" id="tree-maintenance">
+                <div className={`tree-item ${pathname === '/maintenance' ? 'active-item' : ''}`} id="tree-maintenance">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                   </svg>
@@ -85,7 +87,7 @@ export default function Sidebar() {
               </Link>
 
               <Link href="/transfers" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="tree-item" id="tree-transfers">
+                <div className={`tree-item ${pathname === '/transfers' ? 'active-item' : ''}`} id="tree-transfers">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="16 18 22 12 16 6" />
                     <polyline points="8 6 2 12 8 18" />
@@ -95,7 +97,7 @@ export default function Sidebar() {
               </Link>
 
               <Link href="/allocations" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="tree-item" id="tree-allocations">
+                <div className={`tree-item ${pathname === '/allocations' ? 'active-item' : ''}`} id="tree-allocations">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
@@ -107,7 +109,7 @@ export default function Sidebar() {
               </Link>
 
               <Link href="/bookings" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="tree-item" id="tree-bookings">
+                <div className={`tree-item ${pathname === '/bookings' ? 'active-item' : ''}`} id="tree-bookings">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                     <line x1="16" y1="2" x2="16" y2="6" />

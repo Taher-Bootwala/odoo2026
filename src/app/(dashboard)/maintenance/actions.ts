@@ -21,7 +21,7 @@ export async function addMaintenanceRequest(formData: FormData) {
     .from('maintenance_requests')
     .insert([{
       asset_id,
-      priority,
+      priority: priority as any,
       issue_description,
       reported_by: user.id
     }])
